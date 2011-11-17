@@ -186,7 +186,7 @@ class Auction
     
     item = @db[@items_coll].find_one('number' => bid['item_number'])
     
-    # this should no happen
+    # this should not happen
     return @exception_msg if item == nil
     
     # ensure valid bid amount
