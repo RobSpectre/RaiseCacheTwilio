@@ -95,23 +95,28 @@ class Auction
     return @not_registered_msg unless self.is_valid_bidder
     
     bidder = @db[@bidders_coll].find_one({ 'phone' => @phone })
-    puts "#{bidder}"
-    last_item = bidder['last_item'] == nil ? 0 : bidder['last_item']
     
-    i = do_more == true ? last_item : 0
+    if do_more == true
+      last_item = bidder['last_item'] == nil ? 0 : bidder['last_item']
+    else
+      last_item = 0
+    end
+    
     more_msg = ''
     list = ''
+    i = 0
     @db[@items_coll].find.sort('number').each do |item|
-      i++
+      i = i+1
+      puts "i: #{i}, last: #{last_item}"
       if i > last_item then
         # add item to list
         list += sprintf(@list_line, item['number'], item['name'], self.get_high_bid(item['bids']))
       end
       
-      if i >= @list_size_limit then
+      if i >= last_item + @list_size_limit then
         # update the bidder's position in the list
         bidder['last_item'] = i
-        @db[@bidders_coll].save(bidder['last_item'])
+        @db[@bidders_coll].save(bidder)
         
         more_msg = @list_more_msg
         break
