@@ -8,6 +8,8 @@ unconfirmed_bids_coll = 'unconfirmed_bids'
 
 db = Mongo::Connection.new.db(db_name)
 
+db[items_coll].remove
+
 (1..15).each do |i|
   db[items_coll].insert({
     'number' => i,
