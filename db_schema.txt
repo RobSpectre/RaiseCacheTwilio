@@ -1,0 +1,41 @@
+-------------------------------------------
+rc_auction
+-------------------------------------------
+
+items {
+	number: int
+	name: str
+	info: str
+	bids: [] {
+		ts: str
+		bidder_phone: str
+		amount: int
+	}
+}
+
+bidders {
+	name: str
+	phone: str
+}
+
+unconfirmed_bids {
+	item_number: int
+	bidder_phone: str
+	amount: int
+}
+
+
+-------------------------------------------
+rc_raffle
+-------------------------------------------
+
+prizes {
+	number: int
+	name: str
+	info: str
+}
+
+hopefuls {
+	name: str
+	phone: str
+}
