@@ -95,6 +95,7 @@ class Auction
     return @not_registered_msg unless self.is_valid_bidder
     
     bidder = @db[@bidders_coll].find_one({ 'phone' => @phone })
+    puts "#{bidder}"
     last_item = bidder['last_item'] == nil ? 0 : bidder['last_item']
     
     i = do_more == true ? last : 0
