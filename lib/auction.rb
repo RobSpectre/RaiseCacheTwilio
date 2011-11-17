@@ -132,6 +132,8 @@ class Auction
   def get_info (item_number)
     return @not_registered_msg unless self.is_valid_bidder
     
+    item_number = item_number.to_i
+    
     item = @db[@items_coll].find_one('number' => item_number)
     if item == nil then
       @info_err
@@ -147,6 +149,7 @@ class Auction
     return @not_registered_msg unless self.is_valid_bidder
     
     amount = amount.to_i # quietly convert decimals to integers
+    item_number = item_number.to_i
     
     item = @db[@items_coll].find_one('number' => item_number)
     
