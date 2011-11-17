@@ -98,7 +98,7 @@ class Auction
     puts "#{bidder}"
     last_item = bidder['last_item'] == nil ? 0 : bidder['last_item']
     
-    i = do_more == true ? last : 0
+    i = do_more == true ? last_item : 0
     more_msg = ''
     list = ''
     @db[@items_coll].find.sort('number').each do |item|
