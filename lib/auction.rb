@@ -170,7 +170,7 @@ class Auction
       'amount' => bid['amount']
     }
     @db[@items_coll].update(
-      { 'number' => bid['item_number'], 'bids' => { '$size' => bids.size } },
+      { 'number' => bid['item_number'], 'bids' => { '$size' => bids ? bids.size : 0 } },
       { '$push' => { 'bids' => new_bid } }
     )
     
