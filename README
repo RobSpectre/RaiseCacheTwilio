@@ -1,0 +1,3 @@
+SMS-based auction and raffle apps for RaiseCache. Uses the Twilio API.
+
+This bad boy sings with Sinatra.
