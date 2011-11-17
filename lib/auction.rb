@@ -19,9 +19,10 @@ class Auction
     @not_registered_msg = "You must register before you can bid. Please register by texting your first and last name."
 
     @list_line = "%d. %s $%d\n"
-    @list_msg = "* Text [number] for item info.\n* Text [number] $[amount] to bid."
+    @list_msg = "*Text [number] for info."
+    @list_more_msg = "\n*Text MORE for more."
 
-    @info_msg = "%d. %s:\n%s\n* High bid is: $%d\n* Text [number] $[amount] to bid."
+    @info_msg = "%d. %s:\n%s\n*High bid: $%d\n*Text [number] $[amount] to bid."
     @info_err = "Invalid item. Text LIST to see a list of auction items."
     
     @bid_msg = "You are bidding $%d on auction item %d (%s). Text YES to confirm this bid. Text NO to cancel."
@@ -33,6 +34,9 @@ class Auction
     @confirm_bid_outbid_msg = "You've been outbid! The high bid for item %d is now $%d.\n* Text YES to automatically increase your bid to $%d.\n* Text [number] $[amount] to bid a different amount."
     @confirm_bid_exist_err = "You don't have any pending bids.\n* Text [number] $[amount] to bid."
     # end messages
+    
+    # max number of items to send when list is requested
+    @list_size_limit = 4
     
     @phone = phone
     
@@ -46,13 +50,25 @@ class Auction
   end
   
   #
-  # verifies the bidder is registered
+  # helper: verifies the bidder is registered
   #
   def is_valid_bidder
     if @db[@bidders_coll].find_one('phone' => @phone) == nil then
       false
     else
       true
+    end
+  end
+  
+  #
+  # helper: finds the high bid in the given collection of bids
+  #
+  def get_high_bid (bids)
+    if !bids || bids.size == 0 then
+      return 0
+    else
+      bids.sort_by! { |b| b['amount'].to_i }
+      return bids.last['amount'].to_i
     end
   end
   
@@ -72,16 +88,36 @@ class Auction
   end
   
   #
-  # lists the available auction items
+  # lists n available auction items, where n = @list_size_limit
+  # if do_more is true, it continues from last, otherwise it starts at the beginning
   #
-  def get_list
+  def get_list(do_more)
     return @not_registered_msg unless self.is_valid_bidder
     
+    bidder = @db[@bidders_coll].find_one({ 'phone' => @phone })
+    last_item = bidder['last_item'] == nil ? 0 : bidder['last_item']
+    
+    i = do_more == true ? last : 0
+    more_msg = ''
     list = ''
     @db[@items_coll].find.sort('number').each do |item|
-      list += sprintf(@list_line, item['number'], item['name'], self.get_high_bid(item['bids']))
+      i++
+      if i > last_item then
+        # add item to list
+        list += sprintf(@list_line, item['number'], item['name'], self.get_high_bid(item['bids']))
+      end
+      
+      if i >= @list_size_limit then
+        # update the bidder's position in the list
+        bidder['last_item'] = i
+        @db[@bidders_coll].save(bidder['last_item'])
+        
+        more_msg = @list_more_msg
+        break
+      end
     end
-    "#{list}#{@list_msg}"
+    
+    "#{list}#{@list_msg}#{more_msg}"
   end
   
   #
@@ -187,16 +223,4 @@ class Auction
     @help_msg
   end
   
-  
-  #
-  # helper: finds the high bid the given collection of bids
-  #
-  def get_high_bid (bids)
-    if !bids || bids.size == 0 then
-      return 0
-    else
-      bids.sort_by! { |b| b['amount'].to_i }
-      return bids.last['amount'].to_i
-    end
-  end
 end
