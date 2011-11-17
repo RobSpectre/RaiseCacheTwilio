@@ -4,6 +4,7 @@ require 'twilio-ruby'
 require 'mongo'
 require './lib/auction'
 require './lib/raffle'
+require 'local_settings'
 
 bad_command_msg = "ehh... I don't know what to do with that. Text HELP for instructions."
 

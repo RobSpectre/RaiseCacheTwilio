@@ -222,12 +222,26 @@ class Auction
     
     # remove unconfirmed bid record
     @db[@unconfirmed_bids_coll].remove('bidder_phone' => @phone)
+
+    # Notify last 5 bidders that they are outbid
+    self.outbid_notify(item, new_bid['bidder_phone'], new_bid['bidder_phone'])
     
     sprintf(@confirm_bid_msg, bid['amount'], item['number'], item['name'])
   end
 
-  def outbid_notify (bid)
-        
+  # Here marks /rob's first pass at Ruby.  God help ye.
+  def outbid_notify (item, amount, bidder)
+    @client = Twilio::REST::Client.new $account_sid, $auth_token
+    bids = item['bids'].sort_by{|a, b| a['amount'] <=> b['amount']}
+    (0..4).each do |i|
+        if bids[i]['bidder_phone'] != bidder then
+            @client.account.sms.messages.create(
+                :from => $auction_number,
+                :to => bids[i]['bidder_phone'],
+                :body => "You were outbid for #{item['name']}!  Bid is now #{amount}."
+            )       
+        end
+    end
   end
   
   #
