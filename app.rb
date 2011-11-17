@@ -38,14 +38,18 @@ get %r{/auction/sms/?} do
   
   # list auction items
   when /^LIST$/i
-    response = auction.get_list
+    response = auction.get_list(nil)
   
+  # list more auction items
+  when /^MORE$/i
+    response = auction.get_list(true)
+
   # show auction item info
   when /^\d+$/
     response = auction.get_info(msg)
   
   # bid
-  when /^\d+\s\$\d+$/
+  when /^\d+\s\$?\d+$/
     bid = msg.split ' '
     response = auction.bid(bid[0], bid[1].sub('$',''))
   
